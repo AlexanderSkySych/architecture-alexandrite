@@ -1,0 +1,79 @@
+@startuml
+!include C4_Container.puml
+
+AddElementTag("microService", $shape=EightSidedShape(), $bgColor="CornflowerBlue", $fontColor="white", $legendText="micro service\neight sided")
+AddElementTag("storage", $shape=RoundedBoxShape(), $bgColor="lightSkyBlue", $fontColor="white")
+AddElementTag("new_component", $fontColor="#d73027")
+
+SHOW_PERSON_OUTLINE()
+LAYOUT_TOP_DOWN()
+' LAYOUT_AS_SKETCH()
+LAYOUT_WITH_LEGEND()
+
+title Alexandrite Container Diagram
+
+
+Person_Ext(user_customer, Customer, "External User")
+Person(user_seller, Seller, "Пользователь сервиса")
+Person_Ext(user_api, Api User, "External User")
+Person(user_operator, Operator, "Пользователь сервиса")
+
+System_Boundary(main, "Jewerly Store System") {
+    Container(web_shop, "Internet Shop", "Container: Vue, TypeScript, Threejs", "User can make an order, upload 3d model, work in 3d editor")
+    Container(web_crm, "CRM", "Container: Vue, TypeScript")
+    Container(web_mes, "MES", "Container: React, TypeScript", "Provide interface to assign orders on operators, shows list of orders")
+
+    Container(api_mes, "MES API", "Container: C#", "Assigns orders on operators, Shows list of orders Calculates price of order")
+    Container(api_shop, "Shop API", "Container: SpringBoot")
+    Container(api_crm, "CRM API", "Container: SpringBoot")
+
+    System_Boundary(system_db_shop, "Jewerly Store System") {
+        ContainerDb(db_shop, "Shop DB", "Container: Postgresql", "Holds main informaition about work with customers and its orders")
+        ContainerDb(db_shop_slave_0, "Shop DB (Slave)", "Container: Postgresql", $tags="new_component")
+        ContainerDb(db_shop_slave_1, "Shop DB (Slave)", "Container: Postgresql", $tags="new_component")
+    }
+
+    System_Boundary(system_db_mes, "Jewerly Store System") {
+        ContainerDb(db_mes, "MES DB", "Container: Postgresql", "Holds main informaition about orders, its assignments on operators and statuses from MES perspective")
+        ContainerDb(db_mes_slave_0, "Shop DB (Slave)", "Container: Postgresql", $tags="new_component")
+        ContainerDb(db_mes_slave_1, "Shop DB (Slave)", "Container: Postgresql", $tags="new_component")
+    }
+
+    ContainerDb(db_3d, "3D files storrage", "Container: S3 based storrage")
+    ContainerDb(db_cache, "Cache", "Container: Redis", "Кешированные данные сервисов", $tags="new_component")
+
+    ContainerQueue(queue_main, Message Queue, Container: Kafka, $tags="new_component")
+}
+
+Rel(user_customer, web_shop, )
+Rel(user_seller, web_crm, )
+Rel(user_api, api_mes, )
+Rel(user_operator, web_mes, )
+
+Rel(web_shop, api_shop, )
+Rel(web_crm, api_crm, )
+Rel(web_mes, api_mes, )
+
+Rel(api_shop, db_shop, )
+Rel(api_mes, db_mes, )
+
+Rel(api_shop, db_3d, )
+Rel(api_crm, db_3d, )
+Rel(api_mes, db_3d, )
+
+Rel(api_shop, db_cache, )
+Rel(api_crm, db_cache, )
+Rel(api_mes, db_cache, )
+
+BiRel(api_crm, queue_main, "message")
+BiRel(api_mes, queue_main, "message")
+
+Rel(db_shop, db_shop_slave_0, )
+Rel(db_shop, db_shop_slave_1, )
+BiRel_Neighbor(db_shop_slave_0, db_shop_slave_1,)
+
+Rel(db_mes, db_mes_slave_0, )
+Rel(db_mes, db_mes_slave_1, )
+BiRel_Neighbor(db_mes_slave_0, db_mes_slave_1, )
+
+@enduml
