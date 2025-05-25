@@ -43,7 +43,7 @@ System_Boundary(main, "Jewerly Store System") {
     ContainerDb(db_3d, "3D files storrage", "Container: S3 based storrage")
     ContainerDb(db_cache, "Cache", "Container: Redis", "Кешированные данные сервисов", $tags="new_component")
 
-    ContainerQueue(queue_main, Message Queue, Container: Kafka, $tags="new_component")
+    ContainerQueue(queue_main, Message Queue, Container: RabbitMQ, $tags="new_component")
 }
 
 System_Boundary(tracing, "Jewerly Tracing System") {
