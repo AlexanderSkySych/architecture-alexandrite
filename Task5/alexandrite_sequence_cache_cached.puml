@@ -1,0 +1,18 @@
+@startuml
+!include C4_Sequence.puml
+
+Container(web_shop, "Internet Shop", "Container: Vue, TypeScript, Threejs", "User can make an order, upload 3d model, work in 3d editor")
+
+Container_Boundary(backend, "Backend")
+  Container(api_shop, "Shop API", "Container: SpringBoot")
+  ContainerDb(db_cache, "Cache", "Container: Redis", "Кешированные данные сервисов")
+  ContainerDb(db_shop, "Shop DB", "Container: Postgresql", "Holds main informaition about work with customers and its orders")
+Boundary_End()
+
+Rel(web_shop, api_shop, "Запрашивает данные у API")
+Rel(api_shop, db_cache, "Проверяет наличие данных в кеше")
+Rel(db_cache, api_shop, "Возвращает кешированные данные")
+Rel(api_shop, web_shop, "Возвращает данные")
+
+SHOW_LEGEND()
+@enduml
